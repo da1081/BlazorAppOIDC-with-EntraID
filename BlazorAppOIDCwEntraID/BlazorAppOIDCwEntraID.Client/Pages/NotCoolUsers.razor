@@ -1,0 +1,15 @@
+﻿@*
+    Purpose: This page is to demonstrate what happens when a user tries to access a page that they are not authorized to access.
+
+    We give this page a policy that no one should have.
+*@
+
+@page "/not-cool-users"
+@attribute [Authorize(Policy = Policies.PineappleOnPizza)]
+<h3>NotCoolUsers</h3>
+
+<p>You shouldn't be here...</p>
+
+@code {
+
+}

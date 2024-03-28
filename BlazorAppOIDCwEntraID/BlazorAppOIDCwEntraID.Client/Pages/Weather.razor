@@ -1,0 +1,83 @@
+﻿@using BlazorAppOIDCwEntraID.Client.WeatherForecaster
+@implements IDisposable
+@page "/weather"
+@attribute [Authorize]
+@inject PersistentComponentState PersistentComponentState
+@inject IWeatherForecaster WeatherForecaster
+
+<PageTitle>Weather</PageTitle>
+
+<h1>Weather</h1>
+
+<p>
+    Any authorized user can access this.
+</p>
+<p>
+    This page has Authorized attribute which
+    will enforce authorization before accessing
+    the weather data when the page is server
+    rendered.
+</p>
+<p>
+    When page is client rendered there is
+    authorization on the server endpoint that
+    will validate the cookie send with each
+    request. This protects the data when the
+    app is client rendered.
+</p>
+
+<br />
+@if (forecasts == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Temp. (C)</th>
+                <th>Temp. (F)</th>
+                <th>Summary</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var forecast in forecasts)
+            {
+                <tr>
+                    <td>@forecast.Date.ToShortDateString()</td>
+                    <td>@forecast.TemperatureC</td>
+                    <td>@forecast.TemperatureF</td>
+                    <td>@forecast.Summary</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private IEnumerable<WeatherForecast>? forecasts;
+    private PersistingComponentStateSubscription persistingSubscription; // Important to maintain state between page server prerendering and subsequent interactive phase where the component becomes fully interactive on the client side.
+
+    protected override async Task OnInitializedAsync()
+    {
+        persistingSubscription = PersistentComponentState.RegisterOnPersisting(PersistData);
+        if (!PersistentComponentState.TryTakeFromJson<IEnumerable<WeatherForecast>>(nameof(forecasts), out var restoredData))
+        {
+            forecasts = await WeatherForecaster.GetWeatherForecastAsync();
+        }
+        else
+        {
+            forecasts = restoredData!;
+        }
+    }
+
+    private Task PersistData()
+    {
+        PersistentComponentState.PersistAsJson(nameof(forecasts), forecasts);
+        return Task.CompletedTask;
+    }
+
+    void IDisposable.Dispose() => persistingSubscription.Dispose();
+}

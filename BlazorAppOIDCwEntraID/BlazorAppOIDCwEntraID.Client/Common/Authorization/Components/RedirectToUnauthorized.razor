@@ -1,0 +1,15 @@
+﻿@inject NavigationManager NavigationManager
+
+@code {
+    [Parameter] public string? ReturnUrl { get; set; }
+
+    protected override void OnInitialized()
+    {
+        var uri = RouteConstants.AccessDeniedPath;
+        if (!string.IsNullOrWhiteSpace(ReturnUrl))
+        {
+            uri += $"?returnUrl={Uri.EscapeDataString(ReturnUrl)}";
+        }
+        NavigationManager.NavigateTo(uri);
+    }
+}

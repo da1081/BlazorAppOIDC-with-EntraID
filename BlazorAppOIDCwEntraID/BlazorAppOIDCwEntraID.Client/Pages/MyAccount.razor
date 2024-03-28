@@ -1,0 +1,100 @@
+﻿@*
+    Only authenticated users can see this page.
+
+    If you are not authenticated, you will be redirected to the login page.
+*@
+
+@page "/my-account"
+@using BlazorAppOIDCwEntraID.Client.Common.Authentication
+@using System.Security.Claims
+@attribute [Authorize]
+
+<PageTitle>My Account</PageTitle>
+
+<h3>My Account</h3>
+
+<br />
+
+<p>Only authenticated users can see this page.</p>
+<p>@(userInfo?.Name ?? string.Empty) has been authenticated successfully!</p>
+
+<br />
+<NavLink href="/cool-users-only">Only cool users can go here</NavLink>
+<p class="m-0"><small><i>You will have to fulfill the policy called "<strong>IsCoolUser</strong>" to access this page. Find it at ~.Client/Common/Authorization/Policies.cs</i></small></p>
+<p class="m-0"><small><i>You can paste your user id (@userInfo?.UserId) into the claim and restart the application.</i></small></p>
+
+<br />
+<NavLink href="/not-cool-users">Users that are not cool can enter here</NavLink>
+<p class="m-0"><small><i>This is just to demonstrate what happens if users is not authorized.</i></small></p>
+
+
+@if (userInfo != null)
+{
+    <div class="mt-4">
+        <h4>Name: @userInfo.Name</h4>
+        <h5>Roles:</h5>
+        <ul class="list-group">
+            @foreach (var role in userInfo.Roles)
+            {
+                <li class="list-group-item">@role</li>
+            }
+        </ul>
+    </div>
+}
+else
+{
+    <p>Loading userInfo...</p>
+}
+
+@if (claimsPrincipal != null)
+{
+    <div class="mt-4">
+        <h5>Claims:</h5>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Type</th>
+                    <th>Value</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var claim in claimsPrincipal?.Claims ?? [])
+                {
+                    <tr>
+                        <td>@claim.Type</td>
+                        <td>@claim.Value</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+else
+{
+    <p>Loading claimsPrincipal...</p>
+}
+
+
+@code {
+    [CascadingParameter] Task<AuthenticationState>? AuthenticationStateTask { get; set; }
+
+    UserInfo? userInfo;
+    ClaimsPrincipal? claimsPrincipal;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (AuthenticationStateTask == null)
+        {
+            return;
+        }
+
+        var authState = await AuthenticationStateTask;
+        var user = authState.User;
+
+        // Get the user instance as a type of UserInfo
+        userInfo = UserInfo.FromClaimsPrincipal(user);
+
+        // We also want to display all the claims of the user
+        claimsPrincipal = user;
+    }
+}

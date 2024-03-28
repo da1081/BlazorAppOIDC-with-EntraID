@@ -1,0 +1,29 @@
+@attribute [Route(RouteConstants.AccessDeniedPath)]
+@attribute [Authorize]
+
+@inject NavigationManager NavigationManager
+
+<h3>Not Authorized</h3>
+
+<p>
+    Insufficient permission.
+</p>
+
+@if (!string.IsNullOrWhiteSpace(ReturnUrl))
+{
+    <NavLink href="@ReturnUrl">Go back</NavLink>
+}
+
+@code {
+    string ReturnUrl { get; set; } = string.Empty;
+
+    protected override void OnInitialized()
+    {
+        var uri = NavigationManager.ToAbsoluteUri(NavigationManager.Uri);
+        if (Uri.TryCreate(NavigationManager.Uri, UriKind.Absolute, out var uriResult))
+        {
+            var query = System.Web.HttpUtility.ParseQueryString(uriResult.Query);
+            ReturnUrl = query.Get("returnUrl") ?? string.Empty;
+        }
+    }
+}

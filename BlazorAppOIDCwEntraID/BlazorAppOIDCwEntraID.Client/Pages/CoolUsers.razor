@@ -1,0 +1,15 @@
+﻿@*
+    This page is for demonstrating how to use the custom policy "IsCoolUser" to restrict access to a page.
+*@
+
+@page "/cool-users-only"
+@attribute [Authorize(Policy = Policies.IsCoolUser)]
+
+<PageTitle>Cool Users</PageTitle>
+
+<div class="container mt-5">
+    <div class="text-center mb-4">
+        <h3 class="mb-3">Cool Users Only</h3>
+        <p>Only cool users can see this page, you must be cool!</p>
+    </div>
+</div>
