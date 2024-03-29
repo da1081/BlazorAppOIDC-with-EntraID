@@ -1,0 +1,68 @@
+@*
+    Super cool generic component that make state persisting between page reloads a breeze. Especially useful for hybrid rendering scenarios. Enjoy!
+*@
+
+@implements IDisposable
+@inject PersistentComponentState PersistentComponentState
+@typeparam T
+
+@if (isLoaded)
+{
+    @if (data != null)
+    {
+        @ChildContent(data)
+    }
+}
+
+@code {
+    /// <summary>
+    /// The child content that will be rendered when the component is loaded.
+    /// </summary>
+    [Parameter, EditorRequired] public RenderFragment<T> ChildContent { get; set; } = null!;
+
+    /// <summary>
+    /// An async factory method that will be called to create the initial state of the component.
+    /// </summary>
+    [Parameter, EditorRequired] public Func<Task<T>> PersitingFactory { get; set; } = null!;
+
+    /// <summary>
+    /// Optional key to use for persisting the state of the component.
+    /// </summary>
+    /// <remarks>If no key provided the type name will be used.</remarks>
+    [Parameter, EditorRequired] public string PersistingKey { get; set; } = null!;
+
+    private bool isLoaded = false;
+    private PersistingComponentStateSubscription? persistingSubscription;
+    private T? data;
+
+    protected override async Task OnInitializedAsync()
+    {
+        persistingSubscription = PersistentComponentState.RegisterOnPersisting(PersistDataAsync);
+
+        if (!PersistentComponentState.TryTakeFromJson<T>(PersistingKey, out var restoredData))
+        {
+            data = await PersitingFactory.Invoke();
+        }
+        else
+        {
+            data = restoredData;
+        }
+
+        isLoaded = true;
+    }
+
+    private Task PersistDataAsync()
+    {
+        if (data != null)
+        {
+            PersistentComponentState.PersistAsJson(PersistingKey, data);
+        }
+        return Task.CompletedTask;
+    }
+
+
+    void IDisposable.Dispose()
+    {
+        persistingSubscription?.Dispose();
+    }
+}
