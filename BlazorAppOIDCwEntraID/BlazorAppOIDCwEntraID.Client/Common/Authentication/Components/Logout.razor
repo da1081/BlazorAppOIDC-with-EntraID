@@ -1,7 +1,7 @@
 @implements IDisposable
 @inject NavigationManager NavigationManager
 
-@if (isAuthorized)
+@if (isAuthenticated)
 {
     <form action="@RouteConstants.LogoutPath" method="post">
         <AntiforgeryToken />
@@ -15,7 +15,7 @@
 @code {
     [CascadingParameter] Task<AuthenticationState>? AuthenticationStateTask { get; set; }
 
-    bool isAuthorized;
+    bool isAuthenticated;
     string? currentUrl;
 
     protected override async Task OnInitializedAsync()
@@ -26,7 +26,7 @@
         if (AuthenticationStateTask != null)
         {
             var authState = await AuthenticationStateTask;
-            isAuthorized = authState.User.Identity?.IsAuthenticated ?? false;
+            isAuthenticated = authState.User.Identity?.IsAuthenticated ?? false;
         }
     }
 

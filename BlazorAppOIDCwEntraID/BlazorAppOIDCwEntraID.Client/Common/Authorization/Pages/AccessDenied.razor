@@ -5,25 +5,30 @@
 
 <h3>Not Authorized</h3>
 
-<p>
-    Insufficient permission.
-</p>
+<p>Insufficient permission.</p>
 
-@if (!string.IsNullOrWhiteSpace(ReturnUrl))
+@if (!string.IsNullOrWhiteSpace(ReturnUrl) && IsSafeLocalPath(ReturnUrl))
 {
-    <NavLink href="@ReturnUrl">Go back</NavLink>
+    <NavLink href="@ReturnUrl" /> // Safe to redirect
 }
 
 @code {
     string ReturnUrl { get; set; } = string.Empty;
 
-    protected override void OnInitialized()
+    private bool IsSafeLocalPath(string url)
     {
-        var uri = NavigationManager.ToAbsoluteUri(NavigationManager.Uri);
-        if (Uri.TryCreate(NavigationManager.Uri, UriKind.Absolute, out var uriResult))
+        // Decode the URL from URL-encoded form
+        var decodedUrl = System.Net.WebUtility.UrlDecode(url);
+
+        // Check if the decoded URL is a local path
+        // It should start with '/' but not "//" or "/\"
+        if (decodedUrl.StartsWith("/") && !decodedUrl.StartsWith("//") && !decodedUrl.StartsWith("/\\"))
         {
-            var query = System.Web.HttpUtility.ParseQueryString(uriResult.Query);
-            ReturnUrl = query.Get("returnUrl") ?? string.Empty;
+            return true;
         }
+
+        // Additional checks can be made to ensure that the URL is allowed or registered within the application.
+
+        return false;
     }
 }

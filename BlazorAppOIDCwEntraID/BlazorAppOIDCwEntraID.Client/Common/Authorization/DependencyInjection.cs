@@ -11,8 +11,6 @@ public static class DependencyInjection
         {
             options.AddPolicy(Policies.IsCoolUser, Policies.IsCoolUserPolicy); // This is to demonstrate that you are authorized.
             options.AddPolicy(Policies.PineappleOnPizza, Policies.PineappleOnPizzaPolicy); // This is to demonstrate that you are NOT authorized.
-
-            options.InvokeHandlersAfterFailure = false;
         }); // We will add more policies later...
 
         return services;
