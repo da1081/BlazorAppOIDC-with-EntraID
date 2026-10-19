@@ -9,7 +9,7 @@
 
 	<ItemGroup>
 		<ProjectReference Include="..\BlazorAppOIDCwEntraID.Client\BlazorAppOIDCwEntraID.Client.csproj" />
-		<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="8.0.3" />
+		<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="8.0.32" />
 		<PackageReference Include="Microsoft.AspNetCore.Authentication.OpenIdConnect" Version="8.0.3" />
 	</ItemGroup>
 
